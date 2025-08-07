@@ -8,6 +8,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -29,6 +30,7 @@ public class GameScreen implements Screen {
     private ArrayList<String> imagens;
     private Array<Card> cards;
     private Vector2 touchPos;
+    private ShapeRenderer shapeRenderer;
 
     private int rows, cols;
     private float cardWidth, cardHeight, spacingX, spacingY;
@@ -52,6 +54,7 @@ public class GameScreen implements Screen {
         font = new BitmapFont();
         font.getData().setScale(2.5f);
         font.setColor(Color.BLACK);
+        shapeRenderer = new ShapeRenderer();
     }
 
     @Override
@@ -59,16 +62,21 @@ public class GameScreen implements Screen {
         // Registra o tempo inicial quando a tela aparece
         tempoInicial = TimeUtils.millis();
 
+        float paddingX = 20;
+        float paddingTop = 70;   // espaço maior para os textos
+        float paddingBottom = 40; // pode ser menor
+
         // Calcula tamanho das cartas e espaçamento
-        float maxCardWidth = game.getWorldWidth() / (cols + 1);
-        float maxCardHeight = game.getWorldHeight() / (rows + 2);
+        float maxCardWidth = (game.getWorldWidth() - paddingX * 2) / (cols + 1);
+        float maxCardHeight = (game.getWorldHeight() - paddingTop - paddingBottom) / (rows + 1);
         cardWidth = Math.min(maxCardWidth, maxCardHeight);
         cardHeight = cardWidth;
 
         float totalWidth = cols * cardWidth;
         float totalHeight = rows * cardHeight;
+
         spacingX = (game.getWorldWidth() - totalWidth) / (cols + 1);
-        spacingY = (game.getWorldHeight() - totalHeight) / (rows + 1);
+        spacingY = (game.getWorldHeight() - totalHeight - paddingTop - paddingBottom) / (rows + 1);
 
         // Carregar sons
         acertoSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Musics/acerto.mp3"));
@@ -97,7 +105,7 @@ public class GameScreen implements Screen {
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
                 float x = spacingX + col * (cardWidth + spacingX);
-                float y = spacingY + row * (cardHeight + spacingY);
+                float y = paddingBottom + spacingY + row * (cardHeight + spacingY);
                 Texture frontTexture = frutasTextures.get(index);
                 cards.add(new Card(x, y, cardWidth, cardHeight, cardBack, frontTexture));
                 index++;
@@ -192,8 +200,36 @@ public class GameScreen implements Screen {
                
             }
 
-            font.draw(game.spritebatch, "Nível: " + this.game.getNivel(), 40, game.getWorldHeight() - 20);
-            font.draw(game.spritebatch, "Tempo: " + (int) segundosDecorridos + "s", game.getWorldWidth() - 250, game.getWorldHeight() - 20);
+        // Fim do spriteBatch, pois ShapeRenderer precisa fora
+        game.spritebatch.end();
+
+        // --- DESENHAR FUNDO COM SHAPERENDERER ---
+        shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.WHITE);
+
+        // Fundo do texto "Nível"
+        float nivelX = 30;
+        float nivelY = game.getWorldHeight() - 60;
+        float textoAltura = 50;
+        float textoLargura = 150;
+        shapeRenderer.rect(nivelX, nivelY, textoLargura, textoAltura);
+
+        // Fundo do texto "Tempo"
+        float tempoX = game.getWorldWidth() - 220;
+        float tempoY = game.getWorldHeight() - 60;
+        textoAltura = 50;
+        textoLargura = 200;
+        shapeRenderer.rect(tempoX, tempoY, textoLargura, textoAltura);
+
+        shapeRenderer.end();
+
+        // Volta para desenhar texto
+        game.spritebatch.begin();
+
+        // Texto por cima do fundo
+        font.draw(game.spritebatch, "Nível: " + game.getNivel(), nivelX + 10, nivelY + 40);
+        font.draw(game.spritebatch, "Tempo: " + (int) segundosDecorridos + "s", tempoX + 10, tempoY + 40);
         // Termina o desenho
         this.game.spritebatch.end();
     }
@@ -274,5 +310,6 @@ public class GameScreen implements Screen {
         erroSound.dispose();
         acertoSound.dispose();
         font.dispose();
+        shapeRenderer.dispose();
     }
 }

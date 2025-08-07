@@ -6,7 +6,6 @@ Sons_Musics/musicgame.mp3
 Sons_Musics/acerto.mp3
 Sons_Musics/over.mp3
 fogos.gif
-botao.jpg
 Cartas/card_front.png
 Cartas/card_back.png
 Cenario/background.jpg
