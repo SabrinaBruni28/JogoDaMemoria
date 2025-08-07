@@ -7,7 +7,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -24,7 +23,6 @@ public class GameScreen implements Screen {
 
     private Sound clickSound, erroSound, acertoSound;
     private Texture cardBack;
-    private BitmapFont font;
 
     private ArrayList<Texture> frutasTextures;
     private ArrayList<String> imagens;
@@ -50,11 +48,9 @@ public class GameScreen implements Screen {
         frutasTextures = new ArrayList<>();
         imagens = new ArrayList<>();
         touchPos = new Vector2();
-
-        font = new BitmapFont();
-        font.getData().setScale(2.5f);
-        font.setColor(Color.BLACK);
         shapeRenderer = new ShapeRenderer();
+        game.setScaleFont(2.5f);
+        game.clearStage();
     }
 
     @Override
@@ -62,6 +58,20 @@ public class GameScreen implements Screen {
         // Registra o tempo inicial quando a tela aparece
         tempoInicial = TimeUtils.millis();
 
+        // Carregar sons
+        acertoSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Musics/acerto.mp3"));
+        erroSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Musics/error.mp3"));
+        clickSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Musics/click.mp3"));
+
+        // Carregar textura do verso da carta
+        cardBack = new Texture("Cartas/card_back.png");
+
+        // Carregar imagens das frutas do JSON
+        imagens = JsonLoader.carregarFrutas();
+        criarCartas();
+    }
+
+    public void criarCartas() {
         float paddingX = 20;
         float paddingTop = 70;   // espaço maior para os textos
         float paddingBottom = 40; // pode ser menor
@@ -78,28 +88,16 @@ public class GameScreen implements Screen {
         spacingX = (game.getWorldWidth() - totalWidth) / (cols + 1);
         spacingY = (game.getWorldHeight() - totalHeight - paddingTop - paddingBottom) / (rows + 1);
 
-        // Carregar sons
-        acertoSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Musics/acerto.mp3"));
-        erroSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Musics/error.mp3"));
-        clickSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Musics/click.mp3"));
-
-        // Carregar textura do verso da carta
-        cardBack = new Texture("Cartas/card_back.png");
-
-        // Carregar imagens das frutas do JSON
-        imagens = JsonLoader.carregarFrutas();
-
-        // Criar Texturas frontais e duplicar para pares
         frutasTextures.clear();
         int qtdCartas = (rows * cols) / 2;
         for (int i = 0; i < qtdCartas; i++) {
             int idx = i % imagens.size();
-            frutasTextures.add(new Texture(imagens.get(idx)));
+            Texture tex = new Texture(imagens.get(idx));
+            frutasTextures.add(tex);
         }
-        frutasTextures.addAll(new ArrayList<>(frutasTextures));
+        frutasTextures.addAll(new ArrayList<>(frutasTextures)); // duplicar
         Collections.shuffle(frutasTextures);
 
-        // Criar cartas e posicionar
         cards.clear();
         int index = 0;
         for (int row = 0; row < rows; row++) {
@@ -107,10 +105,12 @@ public class GameScreen implements Screen {
                 float x = spacingX + col * (cardWidth + spacingX);
                 float y = paddingBottom + spacingY + row * (cardHeight + spacingY);
                 Texture frontTexture = frutasTextures.get(index);
-                cards.add(new Card(x, y, cardWidth, cardHeight, cardBack, frontTexture));
+                Card card = new Card(x, y, cardWidth, cardHeight, cardBack, frontTexture);
+                cards.add(card);
                 index++;
             }
         }
+
     }
 
     @Override
@@ -135,7 +135,7 @@ public class GameScreen implements Screen {
 
            /* Verifica se uma carta foi clicada. */
            for (Card card : cards) {
-                if (card.bounds.contains(touchPos.x, touchPos.y) && !card.isFlipping()) {
+                if (card.bounds.contains(touchPos.x, touchPos.y) && !card.isFlipping() && !card.isFixa()) {
                     /* Gira a carta. */
                     if (card.flip()) clickSound.play(); 
                 }
@@ -164,7 +164,7 @@ public class GameScreen implements Screen {
             Card secondCard = flippedCards.get(1);
 
             /* Verifica se as cartas combinam. */
-            if (firstCard.getFrontTexture() == secondCard.getFrontTexture()) {
+            if (firstCard.getFrontTexture().equals(secondCard.getFrontTexture())) {
                 acertoSound.play(0.8f);
                 /* Se as cartas combinam elas são fixadas. */
                 firstCard.setFixa(true);
@@ -216,10 +216,10 @@ public class GameScreen implements Screen {
         shapeRenderer.rect(nivelX, nivelY, textoLargura, textoAltura);
 
         // Fundo do texto "Tempo"
-        float tempoX = game.getWorldWidth() - 220;
+        float tempoX = game.getWorldWidth() - 250;
         float tempoY = game.getWorldHeight() - 60;
         textoAltura = 50;
-        textoLargura = 200;
+        textoLargura = 220;
         shapeRenderer.rect(tempoX, tempoY, textoLargura, textoAltura);
 
         shapeRenderer.end();
@@ -228,8 +228,8 @@ public class GameScreen implements Screen {
         game.spritebatch.begin();
 
         // Texto por cima do fundo
-        font.draw(game.spritebatch, "Nível: " + game.getNivel(), nivelX + 10, nivelY + 40);
-        font.draw(game.spritebatch, "Tempo: " + (int) segundosDecorridos + "s", tempoX + 10, tempoY + 40);
+        game.font.draw(game.spritebatch, "Nível: " + game.getNivel(), nivelX + 10, nivelY + 40);
+        game.font.draw(game.spritebatch, "Tempo: " + (int) segundosDecorridos + "s", tempoX + 5, tempoY + 40);
         // Termina o desenho
         this.game.spritebatch.end();
     }
@@ -309,7 +309,6 @@ public class GameScreen implements Screen {
         clickSound.dispose();
         erroSound.dispose();
         acertoSound.dispose();
-        font.dispose();
         shapeRenderer.dispose();
     }
 }

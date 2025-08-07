@@ -5,15 +5,11 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import io.github.memoriagame.MemoriaGame;
 
@@ -23,10 +19,6 @@ public class OverScreen implements Screen {
 
     private Texture frutasTexture;
     private Sound overSound;
-
-    private BitmapFont font;
-    private Stage stage;
-    private Skin skin;
     private TextButton tryAgainButton;
 
     private float frutasWidth = 250;
@@ -36,20 +28,14 @@ public class OverScreen implements Screen {
         this.game = game;
 
         frutasTexture = new Texture("Cenario/frutasTristes.png");
-        this.game.pauseMusic();
+        game.pauseMusic();
 
         overSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Musics/over.mp3"));
         overSound.play(1f);
 
-        font = new BitmapFont();
-        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        font.getData().setScale(3.0f);
-        font.setColor(Color.BLACK);
+        game.stage.clear(); // Remove qualquer ator anterior
 
-        stage = new Stage(new ScreenViewport());
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
-
-        tryAgainButton = new TextButton("Tentar Novamente", skin);
+        tryAgainButton = new TextButton("Tentar Novamente", game.skin);
 
         float buttonWidth = game.getWorldWidth() / 4f;
         float buttonHeight = 60;
@@ -69,37 +55,36 @@ public class OverScreen implements Screen {
             }
         });
 
-        stage.addActor(tryAgainButton);
-        Gdx.input.setInputProcessor(stage);
+        game.stage.addActor(tryAgainButton);
+        Gdx.input.setInputProcessor(game.stage);
     }
 
     @Override
     public void render(float delta) {
         draw();
-        stage.act(delta);
-        stage.draw();
+        game.stage.act(delta);
+        game.stage.draw();
     }
 
     private void draw() {
         ScreenUtils.clear(Color.WHITE);
         game.viewport.apply();
-
         game.spritebatch.setProjectionMatrix(game.viewport.getCamera().combined);
+
         game.spritebatch.begin();
 
         game.spritebatch.draw(game.backgroundTexture, 0, 0, game.getWorldWidth(), game.getWorldHeight());
 
         float imgX = (game.getWorldWidth() - frutasWidth) / 2f;
         float imgY = (game.getWorldHeight() - frutasHeight) / 2f;
-
         game.spritebatch.draw(frutasTexture, imgX, imgY, frutasWidth, frutasHeight);
 
         String overText = "Você perdeu! :(";
-        GlyphLayout layout = new GlyphLayout(font, overText);
+        GlyphLayout layout = new GlyphLayout(game.font, overText);
         float textX = (game.getWorldWidth() - layout.width) / 2;
         float textY = game.getWorldHeight() * 0.85f;
 
-        font.draw(game.spritebatch, layout, textX, textY);
+        game.font.draw(game.spritebatch, layout, textX, textY);
 
         game.spritebatch.end();
     }
@@ -107,7 +92,7 @@ public class OverScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         game.viewport.update(width, height, true);
-        stage.getViewport().update(width, height, true);
+        game.stage.getViewport().update(width, height, true);
 
         frutasWidth = width * 0.25f;
         frutasHeight = frutasWidth;
@@ -116,30 +101,21 @@ public class OverScreen implements Screen {
         float buttonHeight = 60;
         tryAgainButton.setSize(buttonWidth, buttonHeight);
         tryAgainButton.setPosition(
-            (width - buttonWidth) / 2,
+            (game.getWorldWidth() - buttonWidth) / 2,
             game.getWorldHeight() * 0.15f
         );
     }
 
-    @Override
-    public void show() {}
-
-    @Override
-    public void pause() {}
-
-    @Override
-    public void resume() {}
-
-    @Override
-    public void hide() {}
+    @Override public void show() {}
+    @Override public void pause() {}
+    @Override public void resume() {}
+    @Override public void hide() {}
 
     @Override
     public void dispose() {
         frutasTexture.dispose();
         overSound.dispose();
-        font.dispose();
-        stage.dispose();
-        skin.dispose();
+        game.clearStage();
     }
 
     @Override

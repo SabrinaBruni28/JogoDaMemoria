@@ -5,8 +5,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -17,13 +15,9 @@ import io.github.memoriagame.Partida;
 
 public class MenuScreen implements Screen {
 
-    final MemoriaGame game;
+    private final MemoriaGame game;
 
     private Texture frutasTexture;
-
-    private Stage stage;
-    private Skin skin;
-
     private TextButton iniciarButton;
     private Label tituloLabel;
 
@@ -38,24 +32,25 @@ public class MenuScreen implements Screen {
 
         frutasTexture = new Texture("Cenario/frutasFelizes.png");
 
-        // Carrega skin padrão LibGDX
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
-        stage = new Stage(game.viewport);
-        Gdx.input.setInputProcessor(stage);
+        // Limpa o stage antes de adicionar novos elementos
+        game.stage.clear();
+
+        // Define input do stage
+        Gdx.input.setInputProcessor(game.stage);
 
         // Título
-        tituloLabel = new Label("Jogo da Memória", skin);
+        tituloLabel = new Label("Jogo da Memória", game.skin);
         tituloLabel.setFontScale(4f);
         tituloLabel.setColor(Color.BLACK);
-        tituloLabel.pack(); // Atualiza tamanho com base na nova escala de fonte
+        tituloLabel.pack();
         tituloLabel.setPosition(
             (game.viewport.getWorldWidth() - tituloLabel.getWidth()) / 2f,
             game.viewport.getWorldHeight() - tituloLabel.getHeight() - 100
         );
-        stage.addActor(tituloLabel);
+        game.stage.addActor(tituloLabel);
 
         // Botão iniciar
-        iniciarButton = new TextButton("Iniciar Jogo", skin);
+        iniciarButton = new TextButton("Iniciar Jogo", game.skin);
         iniciarButton.setSize(200, 60);
         iniciarButton.setPosition(
             (game.getWorldWidth() - 200) / 2f,
@@ -66,19 +61,15 @@ public class MenuScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.setScreen(new GameScreen(game));
-                dispose();
             }
         });
-        stage.addActor(iniciarButton);
+        game.stage.addActor(iniciarButton);
     }
 
     @Override
-    public String toString() {
-        return "MenuScreen";
+    public void show() {
+        // Opcional: resetar input ou estado do stage aqui se necessário
     }
-
-    @Override
-    public void show() {}
 
     @Override
     public void render(float delta) {
@@ -88,50 +79,45 @@ public class MenuScreen implements Screen {
 
         game.spritebatch.begin();
             game.spritebatch.draw(game.backgroundTexture, 0, 0, game.getWorldWidth(), game.getWorldHeight());
+
             float imgX = (game.viewport.getWorldWidth() - frutasWidth) / 2f;
-            float imgY = game.viewport.getWorldHeight() / 2f - frutasHeight / 2f;  // centro vertical
-
+            float imgY = game.viewport.getWorldHeight() / 2f - frutasHeight / 2f;
             game.spritebatch.draw(frutasTexture, imgX, imgY, frutasWidth, frutasHeight);
-
         game.spritebatch.end();
 
-        stage.act(delta);
-        stage.draw();
+        game.stage.act(delta);
+        game.stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
         game.viewport.update(width, height, true);
-        stage.getViewport().update(width, height, true);
+        game.stage.getViewport().update(width, height, true);
 
-        // Atualiza tamanho da imagem
         frutasWidth = width * 0.25f;
         frutasHeight = frutasWidth;
 
-        // Reposiciona título
         tituloLabel.pack();
         tituloLabel.setPosition(
-            (width - tituloLabel.getWidth()) / 2f,
-            game.viewport.getWorldHeight() - tituloLabel.getHeight() - 100
+            (game.getWorldWidth() - tituloLabel.getWidth()) / 2f,
+            game.getWorldHeight() - tituloLabel.getHeight() - 100
         );
 
-        // Reposiciona botão
-        iniciarButton.setPosition((width - 200) / 2f, 100);
+        iniciarButton.setPosition((game.getWorldWidth() - 200) / 2f, 100);
     }
 
-    @Override
-    public void pause() {}
-
-    @Override
-    public void resume() {}
-
-    @Override
-    public void hide() {}
+    @Override public void pause() {}
+    @Override public void resume() {}
+    @Override public void hide() {}
 
     @Override
     public void dispose() {
         frutasTexture.dispose();
-        stage.dispose();
-        skin.dispose();
+        game.clearStage();
+    }
+
+    @Override
+    public String toString() {
+        return "MenuScreen";
     }
 }
