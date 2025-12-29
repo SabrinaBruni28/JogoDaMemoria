@@ -55,6 +55,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
+        game.playMusic();
         // Registra o tempo inicial quando a tela aparece
         tempoInicial = TimeUtils.millis();
 
