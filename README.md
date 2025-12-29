@@ -1,36 +1,45 @@
-# MemoriaGame
+# 🍎 Jogo da Memória – Tema Frutas
 
-A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
+## Disponível:
+[Jogo da Memoria](https://sabrinabruni28.github.io/JogoDaMemoria/)
 
-This project was generated with a template including simple application launchers and a main class extending `Game` that sets the first screen.
+## 📖 Sobre o Jogo
+Este projeto é um **jogo da memória** com o tema de **frutas**, desenvolvido em **Java utilizando o framework LibGDX**. O jogo foi criado para estimular a memória e a concentração do jogador por meio de desafios progressivos.
 
-## Platforms
+O jogo possui **5 níveis de dificuldade**, nos quais o **tamanho do tabuleiro** e o **tempo disponível** aumentam conforme o avanço do jogador.
 
-- `core`: Main module with the application logic shared by all platforms.
-- `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
-- `html`: Web platform using GWT and WebGL. Supports only Java projects.
+## 🎯 Objetivo
+Encontrar todos os pares de cartas iguais antes que o tempo do nível termine.
 
-## Gradle
+## 🕹️ Mecânicas do Jogo
+- As cartas são organizadas em uma grade.
+- O jogador pode virar duas cartas por jogada.
+- Cartas iguais permanecem visíveis.
+- Cartas diferentes são ocultadas após um curto intervalo.
+- Cada nível possui um tempo limite específico.
 
-This project uses [Gradle](https://gradle.org/) to manage dependencies.
-The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
-Useful Gradle tasks and flags:
+## 📈 Progressão de Dificuldade
+A dificuldade do jogo aumenta de forma gradual a cada nível, com mais cartas no tabuleiro e mais tempo disponível para completar o desafio.
 
-- `--continue`: when using this flag, errors will not stop the tasks from running.
-- `--daemon`: thanks to this flag, Gradle daemon will be used to run chosen tasks.
-- `--offline`: when using this flag, cached dependency archives will be used.
-- `--refresh-dependencies`: this flag forces validation of all dependencies. Useful for snapshot versions.
-- `build`: builds sources and archives of every project.
-- `cleanEclipse`: removes Eclipse project data.
-- `cleanIdea`: removes IntelliJ project data.
-- `clean`: removes `build` folders, which store compiled classes and built archives.
-- `eclipse`: generates Eclipse project data.
-- `html:dist`: compiles GWT sources. The compiled application can be found at `html/build/dist`: you can use any HTTP server to deploy it.
-- `html:superDev`: compiles GWT sources and runs the application in SuperDev mode. It will be available at [localhost:8080/html](http://localhost:8080/html). Use only during development.
-- `idea`: generates IntelliJ project data.
-- `lwjgl3:jar`: builds application's runnable jar, which can be found at `lwjgl3/build/libs`.
-- `lwjgl3:run`: starts the application.
-- `test`: runs unit tests (if any).
+### 📊 Tabela de Progressão
 
-Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
-For example, `core:clean` removes `build` folder only from the `core` project.
+| Nível | Linhas | Colunas | Total de Cartas | Tempo Limite |
+|------:|-------:|--------:|----------------:|-------------:|
+| 1     | 3      | 4       | 12              | 30 segundos  |
+| 2     | 4      | 5       | 20              | 60 segundos  |
+| 3     | 5      | 6       | 30              | 90 segundos  |
+| 4     | 6      | 7       | 42              | 120 segundos |
+| 5     | 7      | 8       | 56              | 150 segundos |
+
+Essa progressão garante um aumento equilibrado do desafio, mantendo o jogo acessível nos níveis iniciais e mais exigente nos níveis avançados.
+
+## 🍓 Tema Visual
+O jogo utiliza cartas ilustradas com **frutas**, proporcionando um visual colorido, simples e agradável.
+
+## 🛠️ Tecnologias Utilizadas
+- **Java**
+- **LibGDX**
+- Gradle
+
+## Desenvolvedora
+[Sabrina Bruni](https://github.com/SabrinaBruni28)
